@@ -4,69 +4,69 @@
 #include<string.h>
 #include<stdlib.h>
 
-#define InputUnitNo     2          // ÀÔ·ÂÃş ³ëµå ¼ö 
-#define HiddenUnitNo    3          // ÀºÀÍÃş ³ëµå ¼ö
-#define OutputUnitNo    1           // Ãâ·ÂÃş ³ëµå ¼ö
-#define MaxPatternNo    4          // ÇĞ½À ÆĞÅÏ ÃÖ´ë¼ö
+#define InputUnitNo     2          // ì…ë ¥ì¸µ ë…¸ë“œ ìˆ˜ 
+#define HiddenUnitNo    3          // ì€ë‹‰ì¸µ ë…¸ë“œ ìˆ˜
+#define OutputUnitNo    1           // ì¶œë ¥ì¸µ ë…¸ë“œ ìˆ˜
+#define MaxPatternNo    4          // í•™ìŠµ íŒ¨í„´ ìµœëŒ€ìˆ˜
 
-#define Eta             0.85        // ÇĞ½À·ü
-#define Alpha           0.24         // °ú°Å °¡ÁßÄ¡¿¡ °üÇÑ Á¤¼ö
-#define ErrorFunc       0.03        // ÇĞ½ÀÁ¾·á Error
-#define Wmin            -0.30       // ÃÊ±â °¡ÁßÄ¡ ÃÖ¼Ò°ª
-#define Wmax            0.30        // ÃÊ±â °¡ÁßÄ¡ ÃÖ´ë°ª
+#define Eta             0.85        // í•™ìŠµë¥ 
+#define Alpha           0.24         // ê³¼ê±° ê°€ì¤‘ì¹˜ì— ê´€í•œ ì •ìˆ˜
+#define ErrorFunc       0.03        // í•™ìŠµì¢…ë£Œ Error
+#define Wmin            -0.30       // ì´ˆê¸° ê°€ì¤‘ì¹˜ ìµœì†Œê°’
+#define Wmax            0.30        // ì´ˆê¸° ê°€ì¤‘ì¹˜ ìµœëŒ€ê°’
 
 /* Sigmoid & Random Numbers */
 #define f(x) (1/(1+exp(-(x))))                              // Simoid Function
 #define rnd() ((double)rand()/0x7fff * (Wmax-Wmin)+Wmin)   // Random Nubers
 
 
-/* ³×Æ®¿öÅ© ±¸¼º */
-double O1[MaxPatternNo][InputUnitNo];                       // ÀÔ·ÂÃş ³ëµå Ãâ·Â°ª
-double O2[HiddenUnitNo];                                    // ÀºÀÍÃş ³ëµå Ãâ·Â°ª 
-double O3[OutputUnitNo];                                    // Ãâ·ÂÃş ³ëµå Ãâ·Â°ª
-double t[MaxPatternNo][OutputUnitNo];                       // ±³»ç½ÅÈ£
-double W21[HiddenUnitNo][InputUnitNo];                      // °¡ÁßÄ¡ (ÀÔ·ÂÃş -> ÀºÀÍÃş)
-double dW21[HiddenUnitNo][InputUnitNo];                     // °¡ÁßÄ¡ (ÀÔ·ÂÃş -> ÀºÀÍÃş) Feed Back
-double W32[OutputUnitNo][HiddenUnitNo];                     // °¡ÁßÄ¡ (ÀºÀÍÃş -> Ãâ·ÂÃş)
-double dW32[OutputUnitNo][HiddenUnitNo];                    // °¡ÁßÄ¡ (ÀºÀÍÃş -> Ãâ·ÂÃş) Feed Back
-double bias2[HiddenUnitNo];                                 // ÀºÀÍÃş ³ëµå È°¼ºÈ­
-double dbias2[HiddenUnitNo];                                // ÀºÀÍÃş ¿ª¹æÇâ ³ëµå È°¼ºÈ­
-double bias3[OutputUnitNo];                                 // Ãâ·ÂÃş ³ëµå È°¼ºÈ­ 
-double dbias3[OutputUnitNo];                                // Ãâ·ÂÃş ¿ª¹æÇâ ³ëµå È°¼ºÈ­
-int learning_pattern_no;                                    // ÇĞ½À ÆĞÅÏ ¼ö
-int test_pattern_no;                                        // ÇĞ½À ÈÄ, Å×½ºÆ® ÆĞÅÏ ¼ö
+/* ë„¤íŠ¸ì›Œí¬ êµ¬ì„± */
+double O1[MaxPatternNo][InputUnitNo];                       // ì…ë ¥ì¸µ ë…¸ë“œ ì¶œë ¥ê°’
+double O2[HiddenUnitNo];                                    // ì€ë‹‰ì¸µ ë…¸ë“œ ì¶œë ¥ê°’ 
+double O3[OutputUnitNo];                                    // ì¶œë ¥ì¸µ ë…¸ë“œ ì¶œë ¥ê°’
+double t[MaxPatternNo][OutputUnitNo];                       // êµì‚¬ì‹ í˜¸
+double W21[HiddenUnitNo][InputUnitNo];                      // ê°€ì¤‘ì¹˜ (ì…ë ¥ì¸µ -> ì€ë‹‰ì¸µ)
+double dW21[HiddenUnitNo][InputUnitNo];                     // ê°€ì¤‘ì¹˜ (ì…ë ¥ì¸µ -> ì€ìµì¸µ) Feed Back
+double W32[OutputUnitNo][HiddenUnitNo];                     // ê°€ì¤‘ì¹˜ (ì€ë‹‰ì¸µ -> ì¶œë ¥ì¸µ)
+double dW32[OutputUnitNo][HiddenUnitNo];                    // ê°€ì¤‘ì¹˜ (ì€ë‹‰ì¸µ -> ì¶œë ¥ì¸µ) Feed Back
+double bias2[HiddenUnitNo];                                 // ì€ë‹‰ì¸µ ë…¸ë“œ í™œì„±í™”
+double dbias2[HiddenUnitNo];                                // ì€ë‹‰ì¸µ ì—­ë°©í–¥ ë…¸ë“œ í™œì„±í™”
+double bias3[OutputUnitNo];                                 // ì¶œë ¥ì¸µ ë…¸ë“œ í™œì„±í™” 
+double dbias3[OutputUnitNo];                                // ì¶œë ¥ì¸µ ì—­ë°©í–¥ ë…¸ë“œ í™œì„±í™”
+int learning_pattern_no;                                    // í•™ìŠµ íŒ¨í„´ ìˆ˜
+int test_pattern_no;                                        // í•™ìŠµ í›„, í…ŒìŠ¤íŠ¸ íŒ¨í„´ ìˆ˜
 
-/* ¸ŞÀÎ ÇÁ·Î±×·¥ */
+/* ë©”ì¸ í”„ë¡œê·¸ë¨ */
 void main(int argc, char* argv[])
 {
-    int i, j, k;                                            // Áö¿ªº¯¼ö(ÀÔ·Â, ÀºÀÍ, Ãâ·Â µî ¹İº¹)
-    char filename[30];                                      // µ¥ÀÌÅÍ ÆÄÀÏÀÌ¸§
-    char ss[80];                                            // ¹®ÀÚ Ã³¸® µ¥ÀÌÅÍ
-    double errorfunc;                                       // ÇĞ½À Á¾·á¸¦ À§ÇÑ º¯¼ö
+    int i, j, k;                                            // ì§€ì—­ë³€ìˆ˜(ì…ë ¥, ì€ë‹‰, ì¶œë ¥ ë“± ë°˜ë³µ)
+    char filename[30];                                      // ë°ì´í„° íŒŒì¼ì´ë¦„
+    char ss[80];                                            // ë¬¸ì ì²˜ë¦¬ ë°ì´í„°
+    double errorfunc;                                       // í•™ìŠµ ì¢…ë£Œë¥¼ ìœ„í•œ ë³€ìˆ˜
 
-    int num = 0;                                            // Error ¹İº¹ È½¼ö 
+    int num = 0;                                            // Error ë°˜ë³µ íšŸìˆ˜ 
 
-    /* ±ä ÇÁ·Î±×·¥À» ´Ü¼øÈ­ ÇÏ±â À§ÇÑ ÇÔ¼ö·Î ºĞ¸® */
-    void propagation();                                     // ¼ø¹æÇâ ³×Æ®¿öÅ© ÇÔ¼ö
-    void back_propagation();                                // ¿ª¹æÇâ ³×Æ®¿öÅ© ÇÔ¼ö
-    void state();                                           // Ãâ·Â°ª Ç¥½Ã ÇÔ¼ö
-    void read_file();                                       // ÆÄÀÏ ÀĞ±â ÇÔ¼ö
-    void initialize();                                      // °¡ÁßÄ¡ ÃÊ±âÈ­ ÇÔ¼ö
+    /* ê¸´ í”„ë¡œê·¸ë¨ì„ ë‹¨ìˆœí™” í•˜ê¸° ìœ„í•œ í•¨ìˆ˜ë¡œ ë¶„ë¦¬ */
+    void propagation();                                     // ìˆœë°©í–¥ ë„¤íŠ¸ì›Œí¬ í•¨ìˆ˜
+    void back_propagation();                                // ì—­ë°©í–¥ ë„¤íŠ¸ì›Œí¬ í•¨ìˆ˜
+    void state();                                           // ì¶œë ¥ê°’ í‘œì‹œ í•¨ìˆ˜
+    void read_file();                                       // íŒŒì¼ ì½ê¸° í•¨ìˆ˜
+    void initialize();                                      // ê°€ì¤‘ì¹˜ ì´ˆê¸°í™” í•¨ìˆ˜
 
     printf("Learning File : ");
     scanf("%s", &filename);                                
-    printf("\n # ÀÔ·ÂÇÑ ÆÄÀÏ¸í: %s", filename);
+    printf("\n # ì…ë ¥í•œ íŒŒì¼ëª…: %s", filename);
 
-    /* °¡ÁßÄ¡º¯È­ ÆÄÀÏ º°µµ ÀúÀå*/
+    /* ê°€ì¤‘ì¹˜ë³€í™” íŒŒì¼ ë³„ë„ ì €ì¥*/
     FILE* fp = fopen("ErrorFunc.txt", "w");
 
     read_file(filename);                         
     initialize();       
 
-    printf("\n\n ****************** ÇĞ½ÀÇÏ±â Àü ******************\n");
+    printf("\n\n ****************** í•™ìŠµí•˜ê¸° ì „ ******************\n");
     printf("\tPattern Output1 Output2 Output3 Output4\n");
 
-    /* ÇĞ½À ÆĞÅÏ¿¡ ´ëÇÑ ÇĞ½À ¹× °á°ú°ª Ç¥½Ã*/
+    /* í•™ìŠµ íŒ¨í„´ì— ëŒ€í•œ í•™ìŠµ ë° ê²°ê³¼ê°’ í‘œì‹œ*/
     for (errorfunc = 0.0, i = 0; i < learning_pattern_no; i++) {
         state(i);
         for (j = 0; j < OutputUnitNo; j++)
@@ -75,113 +75,112 @@ void main(int argc, char* argv[])
     errorfunc /= 2;
     printf(" ErrorFunc : %.3f\n", errorfunc);
 
-    /* ÇĞ½À ½ÃÀÛ */
-    printf("\n******************* ÇĞ½À ½ÃÀÛ ******************* ");
+    /* í•™ìŠµ ì‹œì‘ */
+    printf("\n******************* í•™ìŠµ ì‹œì‘ ******************* ");
     printf("\nCount Pattern  Output1  Output2  Output3  Output4\n");
-    for (i = 0; errorfunc > ErrorFunc; )                                 // Error °ª ÀÌÇÏ ÇĞ½ÀÁ¾·á
+    for (i = 0; errorfunc > ErrorFunc; )                                 // Error ê°’ ì´í•˜ í•™ìŠµì¢…ë£Œ
     {
-        for (j = 0; j < learning_pattern_no; j++){                      // ÇĞ½À µ¥ÀÌÅÍ ¼ö
-            propagation(j);                                             // ¼ø¹æÇâ ÇĞ½À
-            back_propagation(j);                                        // ¿ª¹æÇâ ÇĞ½À
+        for (j = 0; j < learning_pattern_no; j++){                      
+            propagation(j);                                             
+            back_propagation(j);                                        
         }
-        for (errorfunc = 0.0, j = 0; j < learning_pattern_no; j++){        // ÇĞ½À µ¥ÀÌÅÍ ¼ö
+        for (errorfunc = 0.0, j = 0; j < learning_pattern_no; j++){      
             printf("%d", ++i);
-            state(j);                                                   // state() ÇÔ¼ö
-            for (k = 0; k < OutputUnitNo; k++)                         // Ãâ·Â ³ëµå ¼ö 
-             errorfunc += pow(t[j][k] - O3[k], 2.0);                 // ¸ñÇ¥°ª - Ãâ·Â°ª¿¡ ÀÇÇÑ Error °ª »êÃâ
+            state(j);                                                   
+            for (k = 0; k < OutputUnitNo; k++)                         // ì¶œë ¥ ë…¸ë“œ ìˆ˜ 
+             errorfunc += pow(t[j][k] - O3[k], 2.0);                 // Errorê°’ ì‚°ì¶œ
         }
         ++num;
         errorfunc /= 2;
-        printf("ErrorFunc : %.3f\n", errorfunc);                        // Error °ª ¸ğ´ÏÅÍ¿¡ Ãâ·Â
-        fprintf(fp, "%d : %lf \n", num, errorfunc);                      // Error°ª ÃøÁ¤ ¹İº¹ ¹× °ª ÀúÀå
+        printf("ErrorFunc : %.3f\n", errorfunc);                      
+        fprintf(fp, "%d : %lf \n", num, errorfunc);                      
     }
-    fclose(fp);                                                         // ÆÄÀÏ ¾²±â ´İ±â
+    fclose(fp);                                                        
 
-    /* ÇĞ½À Á¾·á */
-    printf("\n *************** ½Å±Ô µ¥ÀÌÅÍ °á°ú ***************\n");
+    /* í•™ìŠµ ì¢…ë£Œ */
+    printf("\n *************** ì‹ ê·œ ë°ì´í„° ê²°ê³¼ ***************\n");
     printf("\tPattern Output1 Output2 Output3 Output4\n");
 
-    /* ½Å±Ô µ¥ÀÌÅÍ ¿¹Ãø °á°ú */
-    for (i = learning_pattern_no; i < learning_pattern_no + test_pattern_no; i++)        // ½Å±Ô µ¥ÀÌÅÍ ¼ö ¸¸Å­ ¿¹Ãø
+    /* ì‹ ê·œ ë°ì´í„° ì˜ˆì¸¡ ê²°ê³¼ */
+    for (i = learning_pattern_no; i < learning_pattern_no + test_pattern_no; i++)       
         state(i);
 }
 
-/* ¼ø¹æÇâ ÀÔ·ÂÃş¿¡¼­ Ãâ·ÂÃşÀ¸·Î */
+/*ìˆœë°©í–¥*/
 void propagation(p)
 int p;
 {
     int i, j;
     double net;
 
-    /* ÀºÀÍÃş ³ëµå¿¡¼­ Ãâ·Â °è»ê */
+    /* ì€ë‹‰ì¸µ ë…¸ë“œì—ì„œ ì¶œë ¥ ê³„ì‚° */
     for (i = 0; i < HiddenUnitNo; i++){
         for (net = 0.0, j = 0; j < InputUnitNo; j++) {
-            net += W21[i][j] * O1[p][j];            // W21 °¡ÁßÄ¡¿Í O1ÀÇ ÇÕ
+            net += W21[i][j] * O1[p][j];            // W21 ê°€ì¤‘ì¹˜ì™€ O1ì˜ í•©
         }         
-         O2[i] = f(net + bias2[i]);                                      // O2 Ãâ·Â°ª = È°¼ºÈ­ÇÔ¼ö f()
+         O2[i] = f(net + bias2[i]);                                      // O2 ì¶œë ¥ê°’ = í™œì„±í™”í•¨ìˆ˜ f()
     }
 
-    /* Ãâ·Â ³ëµå¿¡¼­ Ãâ·Â °è»ê */
+    /* ì¶œë ¥ ë…¸ë“œì—ì„œ ì¶œë ¥ ê³„ì‚° */
     for (size_t i = 0; i < OutputUnitNo; i++)
     {
         for (net = 0.0, j = 0; j < HiddenUnitNo; j++) {
-            net += W32[i][j] * O2[j];                               // W32 °¡ÁßÄ¡¿Í O2ÀÇ ÇÕ
+            net += W32[i][j] * O2[j];                               // W32 ê°€ì¤‘ì¹˜ì™€ O2ì˜ í•©
         }
-        O3[i] = f(net + bias3[i]);                                  // O3 Ãâ·Â°ª = È°¼ºÈ­ ÇÔ¼ö f()
+        O3[i] = f(net + bias3[i]);                                  // O3 ì¶œë ¥ê°’ = í™œì„±í™” í•¨ìˆ˜ f()
     }
 }
 
-/* ¿ª¹æÇâ °¡ÁßÄ¡ º¯°æÀ» À§ÇÑ Ãâ·ÂÃş¿¡¼­ ÀÔ·ÂÃşÀ¸·Î */
+/* ì—­ë°©í–¥ */
 int p;
 void back_propagation(p){
     int i, j;
-    double d2[HiddenUnitNo];                                            // °¡ÁßÄ¡ º¯°æ ÀÔ·Â -> ÀºÀÍ
-    double d3[OutputUnitNo];                                            // °¡ÁßÄ¡ º¯°æ ÀºÀÍ -> Ãâ·Â
-    double sum;                                                         // ÇÕ¸¦ ±¸ÇÏ±â À§ÇÑ º¯¼ö
+    double d2[HiddenUnitNo];                                            // ê°€ì¤‘ì¹˜ ë³€ê²½ ì…ë ¥ -> ì€ë‹‰
+    double d3[OutputUnitNo];                                            // ê°€ì¤‘ì¹˜ ë³€ê²½ ì€ë‹‰ -> ì¶œë ¥
+    double sum;                                                         // í•©ë¥¼ êµ¬í•˜ê¸° ìœ„í•œ ë³€ìˆ˜
 
-/* Æò±ÕÁ¦°ö¿ÀÂ÷: dj=(oj-yj) f'(i,j) */
+/* í‰ê· ì œê³±ì˜¤ì°¨: dj=(oj-yj) f'(i,j) */
     for (i = 0; i < OutputUnitNo; i++) {
-        d3[i] = (t[p][i] - O3[i]) * O3[i] * (1 - O3[i]);     // Ãâ·Â ¿ÀÂ÷ °ª
+        d3[i] = (t[p][i] - O3[i]) * O3[i] * (1 - O3[i]);     // ì¶œë ¥ ì˜¤ì°¨ ê°’
     }                   
 
-    /* °¡ÁßÄ¡ º¯°æ  w_(i,j) =  ¥çd_(j) O_(i)*/
+    /* ê°€ì¤‘ì¹˜ ë³€ê²½  w_(i,j) =  Î·d_(j) O_(i)*/
     for (i = 0; i < HiddenUnitNo; i++)
     {
         for (sum = 0.0, j = 0; j < OutputUnitNo; j++)
         {
-            dW32[j][i] = Eta * d3[j] * O2[i] + Alpha * dW32[j][i];      // Eta ÇĞ½À·ü°ú ¿ª¹æÇâ °¡ÁßÄ¡¿¡ Alpha ÇĞ½À·ü Ãß°¡
-            W32[j][i] += dW32[j][i];                                    // ¿ª¹æÇâ ÇĞ½À °¡ÁßÄ¡¸¦ ¼ø¹æÇâ °¡ÁßÄ¡·Î º¯È¯ 
-            sum += d3[j] * W32[j][i];                                   // ÇÕ = Ãâ·ÂÃş ¹ÙÀÌ¾î½º¿Í °¡ÁßÄ¡(Ãâ·ÂÃş->ÀºÀÍÃş)
+            dW32[j][i] = Eta * d3[j] * O2[i] + Alpha * dW32[j][i];      // Eta í•™ìŠµë¥ ê³¼ ì—­ë°©í–¥ ê°€ì¤‘ì¹˜ì— Alpha í•™ìŠµë¥  ì¶”ê°€
+            W32[j][i] += dW32[j][i];                                    // ì—­ë°©í–¥ í•™ìŠµ ê°€ì¤‘ì¹˜ë¥¼ ìˆœë°©í–¥ ê°€ì¤‘ì¹˜ë¡œ ë³€í™˜ 
+            sum += d3[j] * W32[j][i];                                   // í•© = ì¶œë ¥ì¸µ ë°”ì´ì–´ìŠ¤ì™€ ê°€ì¤‘ì¹˜(ì¶œë ¥ì¸µ->ì€ë‹‰ì¸µ)
         }
-        /* d_(j) = (¥Ò w_(j,i) d_(i)) f'(i,j) */
+        /* d_(j) = (Î£ w_(j,i) d_(i)) f'(i,j) */
         d2[i] = O2[i] * (1 - O2[i]) * sum;
     }
     for (i = 0; i < OutputUnitNo; i++)
     {
-        dbias3[i] = Eta * d3[i] + Alpha * dbias3[i];                    // Eta ÇĞ½À·ü°ú ¿ª¹æÇâ °¡ÁßÄ¡¿¡ Alpha ÇĞ½À·ü Ãß°¡
-        bias3[i] += dbias3[i];                                          // Ãâ·Â ³ëµå È°¼ºÈ­
+        dbias3[i] = Eta * d3[i] + Alpha * dbias3[i];                    // Eta í•™ìŠµë¥ ê³¼ ì—­ë°©í–¥ ê°€ì¤‘ì¹˜ì— Alpha í•™ìŠµë¥  ì¶”ê°€
+        bias3[i] += dbias3[i];                                          // ì¶œë ¥ ë…¸ë“œ í™œì„±í™”
     }
 
-    /* ?w_(i,j) =  ¥çd_(j) O_(i) */
+    /* ?w_(i,j) =  Î·d_(j) O_(i) */
     for (i = 0; i < InputUnitNo; i++)
     {
         for (j = 0; j < HiddenUnitNo; j++)
         {
-            dW21[j][i] = Eta * d2[j] * O1[p][i] + Alpha * dW21[j][i];   // ¿ª¹æÇâ ÀºÀÍÃş °¡ÁßÄ¡
-            W21[j][i] += dW21[j][i];                                    // W21 °¡ÁßÄ¡
+            dW21[j][i] = Eta * d2[j] * O1[p][i] + Alpha * dW21[j][i];   // ì—­ë°©í–¥ ì€ë‹‰ì¸µ ê°€ì¤‘ì¹˜
+            W21[j][i] += dW21[j][i];                                    // W21 ê°€ì¤‘ì¹˜
         }
     }
     for (i = 0; i < HiddenUnitNo; i++)
     {
-        dbias2[i] = Eta * d2[i] + Alpha * dbias2[i];                    // ¿ª ¹æÇâ ÀºÀÍÃş ³ëµå È°¼ºÈ­
-        bias2[i] += dbias2[i];                                          // ÀºÀÍÃş ³ëµå È°¼ºÈ­
+        dbias2[i] = Eta * d2[i] + Alpha * dbias2[i];                    // ì—­ ë°©í–¥ ì€ë‹‰ì¸µ ë…¸ë“œ í™œì„±í™”
+        bias2[i] += dbias2[i];                                          // ì€ë‹‰ì¸µ ë…¸ë“œ í™œì„±í™”
     }
 }
 
-/* °á°ú »óÅÂ Ç¥½Ã */
 void state(int p){
     int i;
-    printf("\t%d -> ", p + 1);                                            // state()ÇÔ¼ö¿¡ »ğÀÔµÇ´Â p°ª + 1 °ª 
+    printf("\t%d -> ", p + 1);                                            // state()í•¨ìˆ˜ì— ì‚½ì…ë˜ëŠ” pê°’ + 1 ê°’ 
     propagation(p);
     for (i = 0; i < OutputUnitNo; i++)
     {
@@ -207,7 +206,7 @@ void read_file(char* name){
             fscanf(fp, "%lf", &t[i][j]);  }
     }
 
-    /* Å×½ºÆ® µ¥ÀÌÅÍ ÀĞ¾î ¿À±â */
+    /* í…ŒìŠ¤íŠ¸ ë°ì´í„° ì½ì–´ ì˜¤ê¸° */
     fscanf(fp, "%d", &test_pattern_no);
     for (i = learning_pattern_no; i < learning_pattern_no + test_pattern_no; i++) {
         for (j = 0; j < InputUnitNo; j++) {
@@ -216,17 +215,17 @@ void read_file(char* name){
     fclose(fp);
 }
 
-/* °¡ÁßÄ¡ ÃÊ±âÈ­ */
+/* ê°€ì¤‘ì¹˜ ì´ˆê¸°í™” */
 void initialize(){
     int i, j;
 
-    /* °¡ÁßÄ¡ ÃÊ±âÈ­ ÀÔ·ÂÃş -> ÀºÀÍÃş */
+    /* ê°€ì¤‘ì¹˜ ì´ˆê¸°í™” ì…ë ¥ì¸µ -> ì€ë‹‰ì¸µ */
     for (i = 0; i < HiddenUnitNo; i++) {
         for (j = 0; j < InputUnitNo; j++) {
             W21[i][j] = ((double)rand() / 0x7fff * (Wmax - Wmin) + Wmin); }
     }
 
-    /* °¡ÁßÄ¡ ÃÊ±âÈ­ ÀºÀÍÃş -> Ãâ·ÂÃş */
+    /* ê°€ì¤‘ì¹˜ ì´ˆê¸°í™” ì€ë‹‰ì¸µ -> ì¶œë ¥ì¸µ */
     for (i = 0; i < OutputUnitNo; i++)  {
         for (j = 0; j < HiddenUnitNo; j++) {
             W32[i][j] = ((double)rand() / 0x7fff * (Wmax - Wmin) + Wmin); }
